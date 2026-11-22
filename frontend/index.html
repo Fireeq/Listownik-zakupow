@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Twórz listy zakupów i zaznaczaj kupione produkty.">
+    <title>Listownik — Twoje listy zakupów</title>
+    <meta name="theme-color" content="#084c4f">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23084c4f'/%3E%3Cpath d='m8 16 5 5 11-11' fill='none' stroke='%23c4ed83' stroke-width='3'/%3E%3C/svg%3E">
+    <link rel="preload" href="assets/manrope.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" type="module"></script>
+  </head>
+  <body id="top">
+    <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <symbol id="icon-bag" viewBox="0 0 24 24">
+        <path d="M5 8h14l1 13H4L5 8Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/>
+      </symbol>
+      <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="icon-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+      <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+      <symbol id="icon-list" viewBox="0 0 24 24">
+        <rect x="5" y="3" width="14" height="18" rx="3"/><path d="M9 8h6M9 12h6M9 16h3"/>
+      </symbol>
+      <symbol id="icon-edit" viewBox="0 0 24 24">
+        <path d="m15 5 4 4M4 20l5-1L20 8a2.8 2.8 0 0 0-4-4L5 15l-1 5Z"/>
+      </symbol>
+      <symbol id="icon-trash" viewBox="0 0 24 24">
+        <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/>
+      </symbol>
+      <symbol id="icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+      <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    </svg>
+
+    <header class="app-header page-width">
+      <a class="brand" href="#top" aria-label="Listownik — początek strony">
+        <span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#icon-bag"/></svg></span>
+        <span>Listownik</span>
+      </a>
+      <nav class="header-navigation" aria-label="Nawigacja">
+        <a href="#lists-section">Moje listy</a>
+        <a id="products-link" href="#list-detail" hidden>Produkty</a>
+      </nav>
+      <div class="header-actions">
+        <span class="header-summary"><span id="header-pending-count">0</span> do kupienia</span>
+        <button id="new-list" class="button button-lime" type="button">
+          <svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg>Nowa lista
+        </button>
+      </div>
+    </header>
+
+    <main id="main-content" class="page-width" aria-busy="true">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <h1 id="hero-title">Dobre zakupy<br>zaczynają się od listy.</h1>
+          <p>Zapisz, czego potrzebujesz.<br>W sklepie po prostu odhaczaj.</p>
+          <button id="hero-new-list" class="button button-lime" type="button">
+            Zrób swoją listę<svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg>
+          </button>
+        </div>
+        <img class="hero-image" src="assets/grocery-bag.png" alt="" width="1024" height="1536" fetchpriority="high">
+        <svg class="hero-decoration" viewBox="0 0 1000 340" fill="none" aria-hidden="true">
+          <g stroke="currentColor" stroke-width="1.5">
+            <path d="M-20 110C40 75 20 12 77 30c55 18-6 78 38 105M22 70l37-14m-13 6-7-23m22 66 27-15"/>
+            <path d="M70 340c-22-38 19-75 40-42 19-32 59 3 32 42m-32-42 8-19m-8 19c-13-16-22-13-22-13"/>
+            <path d="m240 341 38-72 27 18-50 62m23-80-1-22m0 22 15-26m-14 26 27-10m-33 27 12 8m-25 11 13 9"/>
+            <path d="M416 351c-28-12-25-41-8-52 12-7 23-3 29 6 10-8 25-6 31 6 9 18-3 35-21 41m-10-47-1-19m0 19 15-13"/>
+            <path d="M965 250c-20-30 4-46 25-30 7-25 37-14 36 9 28-5 32 24 10 37-19 14-51 9-71-16Zm23 13-13 36m25-34-13 38"/>
+          </g>
+        </svg>
+      </section>
+
+      <section id="lists-section" class="list-picker" aria-labelledby="lists-title">
+        <div class="section-heading">
+          <h2 id="lists-title">Moje listy <span id="list-count" class="count-badge">0</span></h2>
+          <button id="new-list-inline" class="text-button" type="button">
+            Dodaj listę<svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg>
+          </button>
+        </div>
+        <nav aria-label="Listy zakupów">
+          <ul id="shopping-lists" class="shopping-lists"></ul>
+        </nav>
+        <p id="lists-empty" class="lists-empty" hidden>Jeszcze nie masz żadnej listy.</p>
+      </section>
+
+      <div id="page-error" class="alert" role="alert" hidden>
+        <span id="page-error-message"></span>
+        <button id="retry" class="button button-secondary" type="button">Spróbuj ponownie</button>
+      </div>
+      <p id="loading" class="loading" role="status">Wczytywanie list zakupów…</p>
+
+      <section id="welcome" class="welcome" aria-labelledby="welcome-title" hidden>
+        <div class="welcome-icon"><svg class="icon" aria-hidden="true"><use href="#icon-list"/></svg></div>
+        <div>
+          <h2 id="welcome-title">Co dziś trzeba kupić?</h2>
+          <p>Utwórz pierwszą listę. Mleko, pieczywo, coś na obiad — wszystko będzie w jednym miejscu.</p>
+        </div>
+        <button id="create-first-list" class="button button-primary" type="button">
+          Utwórz listę<svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg>
+        </button>
+      </section>
+
+      <section id="list-detail" aria-labelledby="active-list-name" hidden>
+        <div class="detail-heading">
+          <div class="detail-title">
+            <p class="section-kicker">Produkty na liście</p>
+            <h2 id="active-list-name"></h2>
+          </div>
+          <div class="detail-controls">
+            <div class="progress-card">
+              <div class="progress-label"><span id="progress-text"></span><span id="progress-percent"></span></div>
+              <progress id="shopping-progress" value="0" max="1" aria-label="Postęp zakupów"></progress>
+            </div>
+            <div class="heading-actions">
+              <button id="rename-list" class="icon-button" type="button" aria-label="Zmień nazwę listy" title="Zmień nazwę listy">
+                <svg class="icon" aria-hidden="true"><use href="#icon-edit"/></svg>
+              </button>
+              <button id="delete-list" class="icon-button danger" type="button" aria-label="Usuń listę" title="Usuń listę">
+                <svg class="icon" aria-hidden="true"><use href="#icon-trash"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <form id="add-item-form" class="add-item-form">
+          <div class="field product-field">
+            <label for="item-name">Co dopisać do listy?</label>
+            <input id="item-name" name="name" placeholder="Np. mleko, chleb, jabłka…" maxlength="80" required autocomplete="off">
+          </div>
+          <div class="field quantity-field">
+            <label for="item-quantity">Ilość (szt.)</label>
+            <input id="item-quantity" name="quantity" type="number" value="1" min="1" max="999" step="1" required>
+          </div>
+          <button class="button button-primary" type="submit">
+            <svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg>Dodaj produkt
+          </button>
+        </form>
+
+        <div id="filters" class="filters" role="group" aria-label="Filtruj produkty">
+          <button type="button" data-filter="all" aria-pressed="true">Wszystkie <span id="all-count">0</span></button>
+          <button type="button" data-filter="pending" aria-pressed="false">Do kupienia <span id="pending-count">0</span></button>
+          <button type="button" data-filter="purchased" aria-pressed="false">Kupione <span id="purchased-count">0</span></button>
+        </div>
+
+        <ul id="items" class="items" aria-label="Produkty na liście"></ul>
+        <div id="items-empty" class="items-empty" hidden>
+          <span class="empty-icon"><svg class="icon" aria-hidden="true"><use id="items-empty-icon" href="#icon-list"/></svg></span>
+          <h3 id="items-empty-title"></h3>
+          <p id="items-empty-description"></p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer page-width">
+      <span class="footer-brand">Listownik</span>
+      <span>Wszystko, czego potrzebujesz. Na jednej liście.</span>
+      <a href="#top">Na górę <span aria-hidden="true">↑</span></a>
+    </footer>
+
+    <div id="toast" class="toast" role="status" hidden></div>
+
+    <dialog id="list-dialog" aria-labelledby="list-dialog-title">
+      <form id="list-form">
+        <div class="dialog-heading">
+          <h2 id="list-dialog-title">Nowa lista zakupów</h2>
+          <button class="icon-button" type="button" data-close aria-label="Zamknij">
+            <svg class="icon" aria-hidden="true"><use href="#icon-close"/></svg>
+          </button>
+        </div>
+        <div class="field">
+          <label for="list-name">Nazwa listy</label>
+          <input id="list-name" name="name" maxlength="80" placeholder="Np. zakupy na weekend" required autofocus>
+        </div>
+        <p class="form-error" role="alert" hidden></p>
+        <div class="dialog-actions">
+          <button class="button button-secondary" type="button" data-close>Anuluj</button>
+          <button id="save-list" class="button button-primary" type="submit">Utwórz listę</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="item-dialog" aria-labelledby="item-dialog-title">
+      <form id="edit-item-form">
+        <div class="dialog-heading">
+          <h2 id="item-dialog-title">Edytuj produkt</h2>
+          <button class="icon-button" type="button" data-close aria-label="Zamknij">
+            <svg class="icon" aria-hidden="true"><use href="#icon-close"/></svg>
+          </button>
+        </div>
+        <div class="field">
+          <label for="edit-item-name">Nazwa produktu</label>
+          <input id="edit-item-name" name="name" maxlength="80" required autofocus>
+        </div>
+        <div class="field">
+          <label for="edit-item-quantity">Ilość (szt.)</label>
+          <input id="edit-item-quantity" name="quantity" type="number" min="1" max="999" step="1" required>
+        </div>
+        <p class="form-error" role="alert" hidden></p>
+        <div class="dialog-actions">
+          <button class="button button-secondary" type="button" data-close>Anuluj</button>
+          <button class="button button-primary" type="submit">Zapisz zmiany</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="delete-dialog" aria-labelledby="delete-dialog-title" aria-describedby="delete-description">
+      <form id="delete-form">
+        <div class="dialog-heading"><h2 id="delete-dialog-title"></h2></div>
+        <p id="delete-description" class="delete-description"></p>
+        <p class="form-error" role="alert" hidden></p>
+        <div class="dialog-actions">
+          <button class="button button-secondary" type="button" data-close autofocus>Anuluj</button>
+          <button class="button button-danger" type="submit">Usuń</button>
+        </div>
+      </form>
+    </dialog>
+
+    <template id="list-template">
+      <li>
+        <button class="list-button" type="button">
+          <span class="list-symbol"><svg class="icon" aria-hidden="true"><use href="#icon-list"/></svg></span>
+          <span class="list-copy"><span class="list-name"></span><span class="list-meta"></span></span>
+          <span class="list-count" title="Liczba produktów"></span>
+        </button>
+      </li>
+    </template>
+
+    <template id="item-template">
+      <li class="item-row">
+        <div class="item-top">
+          <label class="item-label">
+            <input class="item-checkbox" type="checkbox">
+            <span class="item-status"></span>
+          </label>
+          <div class="item-actions">
+            <button class="icon-button" type="button" data-action="edit" title="Edytuj produkt">
+              <svg class="icon" aria-hidden="true"><use href="#icon-edit"/></svg>
+            </button>
+            <button class="icon-button danger" type="button" data-action="delete" title="Usuń produkt">
+              <svg class="icon" aria-hidden="true"><use href="#icon-trash"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="product-photo" aria-hidden="true"></div>
+        <span class="item-name"></span>
+        <div class="quantity-control">
+          <button class="quantity-button" type="button" data-action="decrease" title="Zmniejsz ilość">
+            <svg class="icon" aria-hidden="true"><use href="#icon-minus"/></svg>
+          </button>
+          <span class="item-quantity"></span>
+          <button class="quantity-button" type="button" data-action="increase" title="Zwiększ ilość">
+            <svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg>
+          </button>
+        </div>
+      </li>
+    </template>
+  </body>
+</html>
