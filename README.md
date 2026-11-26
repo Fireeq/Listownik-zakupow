@@ -49,7 +49,40 @@ Otwórz <http://127.0.0.1:5500>. Oba procesy muszą działać jednocześnie; `Ct
 
 ## Testy
 
-Aktualny zakres to etap 1: implementacja aplikacji. Wymagany zestaw co najmniej 10 testów jednostkowych i 10 integracyjnych w konwencji AAA zostanie dodany w etapie 2, wraz z poleceniem uruchomienia i odnośnikami do plików testowych.
+Testy automatyczne backendu są napisane w [pytest](https://docs.pytest.org/). Każdy test ma budowę **AAA (Arrange–Act–Assert)**, oznaczoną komentarzami `# Arrange`, `# Act` i `# Assert`. Wspólne fixture'y znajdują się w [backend/tests/conftest.py](backend/tests/conftest.py): każdy test dostaje nową, tymczasową bazę SQLite, więc testy są od siebie niezależne i nie zmieniają danych w `backend/listownik.db`.
+
+| Rodzaj | Plik | Liczba testów | Zakres |
+| --- | --- | --- | --- |
+| Jednostkowe | [test_validation.py](backend/tests/unit/test_validation.py) | 12 | Walidacja pól JSON (brakujące i nieznane pola, pusty obiekt), nazw (limit 80 znaków, pusta nazwa, nazwa niebędąca tekstem, znaki sterujące), ilości (wartości graniczne 1 i 999, wartości spoza zakresu i niecałkowite) oraz statusu zakupu. |
+| Integracyjne | [test_lists_api.py](backend/tests/integration/test_lists_api.py) | 6 | Endpointy list: tworzenie z przycięciem spacji, pobieranie od najnowszej z licznikami produktów, zmiana nazwy, usuwanie razem z produktami, błąd 400 dla pustej nazwy, zachowanie danych po ponownym uruchomieniu aplikacji. |
+| Integracyjne | [test_items_api.py](backend/tests/integration/test_items_api.py) | 6 | Endpointy produktów: dodawanie, błąd 404 dla nieistniejącej listy, edycja tylko przesłanych pól, oznaczanie zakupu, próba zmiany produktu przez adres innej listy, usuwanie wybranego produktu. |
+
+Razem jest 12 testów jednostkowych i 12 integracyjnych; po rozwinięciu parametryzacji (`pytest.mark.parametrize`) pytest wykonuje 35 przypadków. Testy jednostkowe sprawdzają pojedyncze funkcje bez bazy danych i serwera. Testy integracyjne wysyłają żądania HTTP przez klienta testowego Flask i przechodzą przez całą ścieżkę: routing, walidację i zapis w SQLite.
+
+Polecenia uruchamia się w głównym katalogu projektu. Jednorazowa instalacja zależności testowych:
+
+```powershell
+./backend/.venv/Scripts/python.exe -m pip install -r backend/requirements-dev.txt
+```
+
+Wszystkie testy:
+
+```powershell
+./backend/.venv/Scripts/python.exe -m pytest
+```
+
+Tylko testy jednostkowe albo tylko integracyjne:
+
+```powershell
+./backend/.venv/Scripts/python.exe -m pytest backend/tests/unit
+./backend/.venv/Scripts/python.exe -m pytest backend/tests/integration
+```
+
+Pokrycie kodu backendu testami (97%; moduły `validation.py` i `database.py` są pokryte w 100%):
+
+```powershell
+./backend/.venv/Scripts/python.exe -m pytest --cov=app --cov=database --cov=validation --cov-report=term-missing
+```
 
 ## Dokumentacja API
 
@@ -98,6 +131,7 @@ Pełny zestaw co najmniej 10 przypadków testowych zostanie opracowany w etapie 
 - Python, [Flask](https://flask.palletsprojects.com/en/stable/) i [Flask-CORS](https://flask-cors.readthedocs.io/en/latest/) — REST API i komunikacja z osobno uruchamianym frontendem.
 - SQLite i moduł `sqlite3` — zapis danych.
 - HTML, CSS i JavaScript — interfejs użytkownika.
+- [pytest](https://docs.pytest.org/) i [pytest-cov](https://pytest-cov.readthedocs.io/) — testy jednostkowe i integracyjne oraz pomiar pokrycia kodu.
 - Git — kontrola wersji.
 
 ## Wygląd i zasoby graficzne
